@@ -40,15 +40,23 @@ class _HomeState extends State<Home> {
                 fontWeight: FontWeight.bold)),
         centerTitle: true,
         actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const RandomJokeScreen()),
-                );
-              },
-              icon: const Icon(Icons.alt_route, color: Colors.white, size: 24))
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RandomJokeScreen(),
+                ),
+              );
+            },
+            child: const Text(
+              'Random',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+              ),
+            ),
+          ),
         ],
       ),
       body: jokeTypes.isEmpty

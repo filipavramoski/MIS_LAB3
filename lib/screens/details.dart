@@ -1,43 +1,25 @@
 import 'package:flutter/material.dart';
 import '../models/joke.dart';
-import '../services/api_service.dart';
 import '../widgets/details/detail_back_button.dart';
 import '../widgets/details/detail_data.dart';
 import '../widgets/details/detail_title.dart';
+import '../services/api_service.dart';
 
-class JokeDetails extends StatefulWidget {
+class JokeDetails extends StatelessWidget {
   const JokeDetails({super.key});
 
   @override
-  State<JokeDetails> createState() => _JokeDetailsState();
-}
-
-class _JokeDetailsState extends State<JokeDetails> {
-  Joke joke = Joke(setup: '', punchline: '', type: '');
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final arguments = ModalRoute.of(context)?.settings.arguments as Joke;
-    getJokeDetails(arguments);
-  }
-
-  void getJokeDetails(Joke selectedJoke) async {
-    setState(() {
-      joke = selectedJoke;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final arguments = ModalRoute.of(context)?.settings.arguments as Joke;
+    final joke = ModalRoute.of(context)?.settings.arguments as Joke?;
+
+    if (joke == null)
+      return const Center(child: Text('Joke details not available'));
+
     return Scaffold(
       body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            DetailTitle(type: arguments.type),
+            DetailTitle(type: joke.type),
             DetailData(joke: joke),
           ],
         ),
@@ -54,38 +36,26 @@ class JokesByTypeScreen extends StatefulWidget {
   const JokesByTypeScreen({super.key, required this.type});
 
   @override
-  State<JokesByTypeScreen> createState() => _JokesByTypeState();
+  _JokesByTypeScreenState createState() => _JokesByTypeScreenState();
 }
 
-class _JokesByTypeState extends State<JokesByTypeScreen> {
-  List<Joke> jokes = [];
-  String currentType = '';
+class _JokesByTypeScreenState extends State<JokesByTypeScreen> {
+  late List<Joke> jokes;
 
   @override
   void initState() {
     super.initState();
-    currentType = widget.type;
-    getJokesFromAPI();
+    jokes = [];
+    _fetchJokes();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (currentType != widget.type) {
-      setState(() {
-        currentType = widget.type;
-        getJokesFromAPI();
-      });
-    }
-  }
-
-  void getJokesFromAPI() async {
+  void _fetchJokes() async {
     try {
-      final response = await ApiService.getJokesByType(currentType);
+      final response = await ApiService.getJokesByType(widget.type);
       setState(() {
         jokes = List.from(response);
       });
-    } catch (error) {}
+    } catch (e) {}
   }
 
   @override
@@ -93,15 +63,7 @@ class _JokesByTypeState extends State<JokesByTypeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent[100],
-        title: Text(
-          '$currentType Jokes',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+        title: Text('${widget.type} Jokes'),
       ),
       body: jokes.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -116,7 +78,7 @@ class _JokesByTypeState extends State<JokesByTypeScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const JokeDetails(),
+                        builder: (context) => JokeDetails(),
                         settings: RouteSettings(arguments: joke),
                       ),
                     );

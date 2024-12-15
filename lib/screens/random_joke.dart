@@ -4,55 +4,13 @@ import '../services/api_service.dart';
 import '../widgets/details/detail_back_button.dart';
 import '../widgets/details/detail_data.dart';
 import '../widgets/details/detail_title.dart';
-
-class RandomJokeDetails extends StatefulWidget {
-  const RandomJokeDetails({super.key});
-
-  @override
-  State<RandomJokeDetails> createState() => _RandomJokeDetailsState();
-}
-
-class _RandomJokeDetailsState extends State<RandomJokeDetails> {
-  Joke joke = Joke(setup: '', punchline: '', type: '');
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final arguments = ModalRoute.of(context)?.settings.arguments as Joke;
-    getJokeDetails(arguments);
-  }
-
-  void getJokeDetails(Joke selectedJoke) async {
-    setState(() {
-      joke = selectedJoke;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final arguments = ModalRoute.of(context)?.settings.arguments as Joke;
-    return Scaffold(
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DetailTitle(type: arguments.type),
-            DetailData(joke: joke),
-          ],
-        ),
-      ),
-      floatingActionButton: const DetailBackButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-    );
-  }
-}
+import 'details.dart';
 
 class RandomJokeScreen extends StatefulWidget {
   const RandomJokeScreen({super.key});
 
   @override
-  State<RandomJokeScreen> createState() => _RandomJokeScreenState();
+  _RandomJokeScreenState createState() => _RandomJokeScreenState();
 }
 
 class _RandomJokeScreenState extends State<RandomJokeScreen> {
@@ -61,22 +19,16 @@ class _RandomJokeScreenState extends State<RandomJokeScreen> {
   @override
   void initState() {
     super.initState();
-    getRandomJokeFromAPI();
+    _fetchRandomJoke();
   }
 
-  void getRandomJokeFromAPI() async {
+  void _fetchRandomJoke() async {
     try {
-      final response = await ApiService.getRandomJoke();
+      final joke = await ApiService.getRandomJoke();
       setState(() {
-        randomJoke = response;
+        randomJoke = joke;
       });
-    } catch (error) {
-      print("Error fetching random joke: $error");
-    }
-  }
-
-  void refreshJoke() {
-    getRandomJokeFromAPI();
+    } catch (e) {}
   }
 
   @override
@@ -84,16 +36,11 @@ class _RandomJokeScreenState extends State<RandomJokeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent[100],
-        title: const Text('Random Joke',
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold)),
-        centerTitle: true,
+        title: const Text('Random Joke'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: refreshJoke,
+            icon: const Icon(Icons.refresh),
+            onPressed: _fetchRandomJoke,
           ),
         ],
       ),
@@ -104,7 +51,7 @@ class _RandomJokeScreenState extends State<RandomJokeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const RandomJokeDetails(),
+                    builder: (context) => JokeDetails(),
                     settings: RouteSettings(arguments: randomJoke),
                   ),
                 );
@@ -112,28 +59,14 @@ class _RandomJokeScreenState extends State<RandomJokeScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      randomJoke!.setup,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.w600),
-                      textAlign: TextAlign.center,
-                    ),
+                    Text(randomJoke!.setup,
+                        style: const TextStyle(fontSize: 20)),
                     const SizedBox(height: 20),
-                    Text(
-                      randomJoke!.punchline,
-                      style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent),
-                      textAlign: TextAlign.center,
-                    ),
+                    Text(randomJoke!.punchline,
+                        style: const TextStyle(fontSize: 24)),
                     const SizedBox(height: 20),
-                    Text(
-                      'Tap to see more details',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                    ),
+                    const Text('Tap to see more details'),
                   ],
                 ),
               ),
