@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/joke.dart';
 
 class FavoritesScreen extends StatefulWidget {
-  static final List<Joke> favoriteJokes = []; // Add this static list
+  static final List<Joke> favoriteJokes = [];
   const FavoritesScreen({super.key});
 
   @override
