@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:lab2_211063/screens/favorites.dart';
 import 'screens/details.dart';
 import 'screens/random_joke.dart';
 import 'screens/home.dart';
@@ -36,7 +37,9 @@ class MyApp extends StatelessWidget {
       ),
       home: const Home(),
       routes: {
+        '/home': (context) => const Home(),
         '/random': (context) => const RandomJokeScreen(),
+        '/favorites': (context) => const FavoritesScreen()
       },
     );
   }
