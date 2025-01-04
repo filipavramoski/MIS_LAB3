@@ -4,88 +4,37 @@ import '../widgets/details/detail_back_button.dart';
 import '../widgets/details/detail_data.dart';
 import '../widgets/details/detail_title.dart';
 import '../services/api_service.dart';
+import 'favorites.dart';
 
 class JokeDetails extends StatelessWidget {
-  const JokeDetails({super.key});
+  final Joke joke;
 
-  @override
-  Widget build(BuildContext context) {
-    final joke = ModalRoute.of(context)?.settings.arguments as Joke?;
-
-    if (joke == null)
-      return const Center(child: Text('Joke details not available'));
-
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            DetailTitle(type: joke.type),
-            DetailData(joke: joke),
-          ],
-        ),
-      ),
-      floatingActionButton: const DetailBackButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-    );
-  }
-}
-
-class JokesByTypeScreen extends StatefulWidget {
-  final String type;
-
-  const JokesByTypeScreen({super.key, required this.type});
-
-  @override
-  _JokesByTypeScreenState createState() => _JokesByTypeScreenState();
-}
-
-class _JokesByTypeScreenState extends State<JokesByTypeScreen> {
-  late List<Joke> jokes;
-
-  @override
-  void initState() {
-    super.initState();
-    jokes = [];
-    _fetchJokes();
-  }
-
-  void _fetchJokes() async {
-    try {
-      final response = await ApiService.getJokesByType(widget.type);
-      setState(() {
-        jokes = List.from(response);
-      });
-    } catch (e) {}
-  }
+  const JokeDetails({super.key, required this.joke});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent[100],
-        title: Text('${widget.type} Jokes'),
+        title: const Text('Joke Details'),
       ),
-      body: jokes.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: jokes.length,
-              itemBuilder: (context, index) {
-                final joke = jokes[index];
-                return ListTile(
-                  title: Text(joke.setup),
-                  subtitle: Text(joke.punchline),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => JokeDetails(),
-                        settings: RouteSettings(arguments: joke),
-                      ),
-                    );
-                  },
-                );
-              },
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              joke.setup,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
+            const SizedBox(height: 16),
+            Text(
+              joke.punchline,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

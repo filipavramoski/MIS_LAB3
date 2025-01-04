@@ -5,70 +5,90 @@ import '../widgets/details/detail_back_button.dart';
 import '../widgets/details/detail_data.dart';
 import '../widgets/details/detail_title.dart';
 import 'details.dart';
+import 'favorites.dart';
 
 class RandomJokeScreen extends StatefulWidget {
   const RandomJokeScreen({super.key});
 
   @override
-  _RandomJokeScreenState createState() => _RandomJokeScreenState();
+  State<RandomJokeScreen> createState() => _RandomJokeScreenState();
 }
 
 class _RandomJokeScreenState extends State<RandomJokeScreen> {
-  Joke? randomJoke;
+  Joke? currentJoke;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchRandomJoke();
+    _loadRandomJoke();
   }
 
-  void _fetchRandomJoke() async {
-    try {
-      final joke = await ApiService.getRandomJoke();
-      setState(() {
-        randomJoke = joke;
-      });
-    } catch (e) {}
+  Future<void> _loadRandomJoke() async {
+    setState(() => isLoading = true);
+    final joke = await ApiService.getRandomJoke();
+    setState(() {
+      currentJoke = joke;
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent[100],
         title: const Text('Random Joke'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _fetchRandomJoke,
-          ),
-        ],
       ),
-      body: randomJoke == null
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => JokeDetails(),
-                    settings: RouteSettings(arguments: randomJoke),
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    currentJoke?.setup ?? '',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text(randomJoke!.setup,
-                        style: const TextStyle(fontSize: 20)),
-                    const SizedBox(height: 20),
-                    Text(randomJoke!.punchline,
-                        style: const TextStyle(fontSize: 24)),
-                    const SizedBox(height: 20),
-                    const Text('Tap to see more details'),
-                  ],
-                ),
+                  const SizedBox(height: 20),
+                  Text(
+                    currentJoke?.punchline ?? '',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          FavoritesScreen.favoriteJokes
+                                  .any((j) => j.setup == currentJoke?.setup)
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (currentJoke != null) {
+                              if (FavoritesScreen.favoriteJokes
+                                  .any((j) => j.setup == currentJoke?.setup)) {
+                                FavoritesScreen.favoriteJokes.removeWhere(
+                                    (j) => j.setup == currentJoke?.setup);
+                              } else {
+                                FavoritesScreen.favoriteJokes.add(currentJoke!);
+                              }
+                            }
+                          });
+                        },
+                      ),
+                      ElevatedButton(
+                        onPressed: _loadRandomJoke,
+                        child: const Text('Next Joke'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
     );

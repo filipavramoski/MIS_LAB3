@@ -3,6 +3,8 @@ import '../services/api_service.dart';
 import '../widgets/card.dart';
 import 'details.dart';
 import 'random_joke.dart';
+import 'favorites.dart';
+import 'jokes_by_type.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -21,10 +23,9 @@ class _HomeState extends State<Home> {
   }
 
   void getJokeTypesFromAPI() async {
-    ApiService.getJokeTypes().then((response) {
-      setState(() {
-        jokeTypes = List.from(response);
-      });
+    final response = await ApiService.getJokeTypes();
+    setState(() {
+      jokeTypes = List<String>.from(response);
     });
   }
 
@@ -33,13 +34,27 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 143, 130, 255),
-        title: const Text("211063",
-            style: TextStyle(
-                color: Colors.black,
-                fontSize: 24,
-                fontWeight: FontWeight.bold)),
+        title: const Text(
+          "211063",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FavoritesScreen(),
+                ),
+              );
+            },
+          ),
           TextButton(
             onPressed: () {
               Navigator.push(
@@ -70,8 +85,9 @@ class _HomeState extends State<Home> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            JokesByTypeScreen(type: jokeTypes[index]),
+                        builder: (context) => JokesByTypeScreen(
+                          type: jokeTypes[index],
+                        ),
                       ),
                     );
                   },
