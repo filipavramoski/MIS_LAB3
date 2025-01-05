@@ -9,12 +9,29 @@ import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await FirebaseApi().initNotification();
-  runApp(const MyApp());
+
+  try {
+  
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print("Firebase initialized successfully");
+
+   
+    await FirebaseApi().initNotification();
+    print("Notifications initialized successfully");
+
+    
+    runApp(const MyApp());
+  } catch (e) {
+    
+    print("Error initializing Firebase or notifications: $e");
+
+   
+ 
+  }
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
